@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#7a4a28">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M6 30V14Q6 3 16 3T26 14V30Z' fill='%238a5a33'/%3E%3Ccircle cx='21' cy='19' r='2.2' fill='%23e8a317'/%3E%3C/svg%3E">
+<title>Monty Hall Simulator</title>
+<style>
+:root{--bg:#faf3e8;--ink:#3b2a1e;--mute:#7a6455;--panel:#fffdf8;--line:#e6d6bf;--door:#8b5b35;--doorhi:#b2754b;--gold:#d9962b;--win:#2c8a5e;--onwin:#ffffff;--lose:#c4493d;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1f1510;--ink:#f4e8d8;--mute:#bfa88f;--panel:#2c1f17;--line:#4a3626;--door:#8b5b35;--doorhi:#b2754b;--gold:#f0b24a;--win:#6fd3a0;--onwin:#0f2a1c;--lose:#ff8a7d}}
+:root[data-theme="dark"]{--bg:#1f1510;--ink:#f4e8d8;--mute:#bfa88f;--panel:#2c1f17;--line:#4a3626;--door:#8b5b35;--doorhi:#b2754b;--gold:#f0b24a;--win:#6fd3a0;--onwin:#0f2a1c;--lose:#ff8a7d}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Georgia,"Times New Roman",serif}
+main{max-width:640px;margin:0 auto;padding:20px 16px 40px}
+h1{font-size:2rem;line-height:1.1;margin:8px 0 6px;letter-spacing:-.01em}
+h2{font-size:1.15rem;margin:0 0 10px}
+p{margin:0 0 10px}
+.mute{color:var(--mute);font-size:.95rem}
+.msg{min-height:3.2em;font-size:1.1rem;margin:14px 0;background:var(--panel);border:2px dashed var(--gold);border-radius:12px;padding:10px 14px}
+.doors{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;perspective:900px}
+.doors.d5,.doors.d10{grid-template-columns:repeat(5,1fr);gap:8px}
+.door{aspect-ratio:255/432;border:0;border-radius:0;background:url(data:image/png;base64,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) center/100% 100% no-repeat;color:#fff;font:700 2.4rem Georgia,serif;position:relative;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;transition:transform .15s}
+.d5 .door,.d10 .door{font-size:1.4rem;border-radius:40px 40px 4px 4px}
+.d5 .door small,.d10 .door small{display:none}
+.d5 .door::after,.d10 .door::after{width:6px;height:6px}
+.door:hover:not(:disabled){transform:translateY(-4px)}
+.door:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.door:disabled{cursor:default}
+.door small{font:600 .8rem system-ui,sans-serif}
+.door.picked{box-shadow:0 0 0 4px var(--gold)}
+.door.open{background:var(--panel);color:var(--ink);border:6px solid #8b5b35}
+.num{display:grid;place-items:center;width:46px;height:46px;border-radius:50%;background:#fff3d6;color:#5a3a1f;border:3px solid #8b5b35;font:700 1.5rem Georgia,serif;box-shadow:0 2px 4px rgba(0,0,0,.35)}
+.door:not(.open) small{background:rgba(40,22,10,.75);color:#fff;border-radius:8px;padding:2px 8px}
+.hero{background:linear-gradient(135deg,#7a4a28,#b2754b);color:#fff;border-radius:18px;padding:20px 18px;margin:4px 0 8px}
+.hero h1{margin:0 0 6px}.hero p{margin:0;opacity:.95}
+#stay{background:var(--gold);border-color:var(--gold);color:#2b1a0e}
+#switch{background:var(--gold);border-color:var(--gold);color:#2b1a0e}
+#again{background:var(--door);border-color:var(--door);color:#fff}
+.door.swing{animation:swing .5s ease-out backwards;transform-origin:left center}
+@keyframes swing{from{transform:rotateY(-80deg) scale(.9);opacity:.3}to{transform:none;opacity:1}}
+.door.open .em{display:block;width:68%}
+.door.open .em svg{display:block;width:100%;height:auto}
+.door.win{border-color:var(--win)}
+.door.lose{border-color:var(--lose)}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
+button.b{font:600 1rem system-ui,sans-serif;padding:12px 18px;border-radius:10px;border:2px solid var(--ink);background:var(--ink);color:var(--bg);cursor:pointer}
+button.b.alt{background:transparent;color:var(--ink)}
+button.b.alt[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+button.b:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+button.b[hidden]{display:none}
+.card{background:var(--panel);border:1px solid var(--line);border-top:6px solid var(--gold);border-radius:14px;padding:16px;margin-top:22px}
+.bars{display:grid;gap:12px;margin-top:10px}
+.bar{font:600 .9rem system-ui,sans-serif}
+.track{height:26px;background:var(--line);border-radius:6px;overflow:hidden;margin-top:4px}
+.fill{height:100%;background:var(--gold);width:0;transition:width .5s;display:flex;align-items:center;padding-left:8px;color:#1d0a1b;font-weight:700}
+.fill.sw{background:var(--win);color:var(--onwin)}
+.sub{display:flex;justify-content:space-between}
+table{width:100%;border-collapse:collapse;font:.95rem system-ui,sans-serif;margin:10px 0}
+th,td{text-align:left;padding:8px;border-bottom:1px solid var(--line)}
+td.w{color:var(--win);font-weight:700}td.l{color:var(--lose);font-weight:700}
+.conf{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:50}
+.conf span{position:absolute;top:-16px;width:9px;height:14px;border-radius:2px;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(540deg)}}
+@media (prefers-reduced-motion:reduce){.door.swing{animation:none}}
+</style>
+</head>
+<body>
+<main>
+<div class="hero"><h1>Monty Hall Simulator</h1>
+<p>One door hides a car. The other two hide goats. Pick a door, the host opens a goat door, then you decide: stay or switch.</p></div>
+<div class="msg" id="msg" aria-live="polite"></div>
+<div class="doors" id="doors"></div>
+<div class="row">
+  <button class="b" id="stay" hidden>Stay</button>
+  <button class="b alt" id="switch" hidden>Switch</button>
+  <button class="b" id="again" hidden>Play again</button>
+</div>
+
+<div class="card">
+  <h2 id="mineh">Your results</h2>
+  <div class="bars" id="mine"></div>
+  <div class="row"><button class="b alt" id="reset">Reset my score</button></div>
+</div>
+
+<div class="card">
+  <h2>Run the simulation</h2>
+  <p class="mute">The computer plays both strategies many times so you can see what really happens.</p>
+  <div class="row" id="runs"></div>
+  <div class="bars" id="sim"></div>
+  <p class="mute" id="note" style="margin-top:12px"></p>
+</div>
+
+<div class="card">
+  <h2>Why does switching win?</h2>
+  <p>The host knows where the car is and always opens goat doors, so your first pick is still only a 1 in 3 guess. The other 2 in 3 chance gets squeezed onto the one door left closed.</p>
+  <div style="overflow-x:auto"><table>
+    <tr><th>Your first pick</th><th>Chance</th><th>If you switch</th></tr>
+    <tr><td>The car</td><td>1 in 3</td><td class="l">You lose</td></tr>
+    <tr><td>Goat 1</td><td>1 in 3</td><td class="w">You win</td></tr>
+    <tr><td>Goat 2</td><td>1 in 3</td><td class="w">You win</td></tr>
+  </table></div>
+  <p>So switching wins 2 times out of 3.</p>
+  <p><strong>Try it with 100 doors.</strong> You pick one, a 1 in 100 chance. The host opens 98 goat doors and leaves one closed. Your door is still a 1 in 100 guess, so the other door almost certainly has the car.</p>
+</div>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const CAR=`<svg viewBox='0 0 120 70' role='img' aria-label='Car'><path d='M8 46 Q8 36 20 34 L34 18 Q37 14 42 14 H78 Q83 14 86 18 L98 34 Q112 36 112 46 V52 H8Z' fill='#e0453a' stroke='#1f3a4d' stroke-width='3' stroke-linejoin='round'/><path d='M38 33 L46 20 H60 V33Z M66 33 V20 H78 L90 33Z' fill='#cfe8f5' stroke='#1f3a4d' stroke-width='2.5' stroke-linejoin='round'/><circle cx='32' cy='52' r='11' fill='#1f3a4d'/><circle cx='32' cy='52' r='4.5' fill='#cfd8de'/><circle cx='88' cy='52' r='11' fill='#1f3a4d'/><circle cx='88' cy='52' r='4.5' fill='#cfd8de'/></svg>`;
+const GOAT=`<svg viewBox='0 0 100 100' role='img' aria-label='Goat'><path d='M34 30 Q24 8 40 4' fill='none' stroke='#7a5c3e' stroke-width='5' stroke-linecap='round'/><path d='M66 30 Q76 8 60 4' fill='none' stroke='#7a5c3e' stroke-width='5' stroke-linecap='round'/><ellipse cx='18' cy='42' rx='14' ry='6' transform='rotate(-20 18 42)' fill='#f7f2e8' stroke='#3a2f2a' stroke-width='3'/><ellipse cx='82' cy='42' rx='14' ry='6' transform='rotate(20 82 42)' fill='#f7f2e8' stroke='#3a2f2a' stroke-width='3'/><path d='M44 80 Q50 98 56 80Z' fill='#f7f2e8' stroke='#3a2f2a' stroke-width='3' stroke-linejoin='round'/><path d='M30 32 Q50 22 70 32 Q74 60 64 76 Q50 84 36 76 Q26 60 30 32Z' fill='#f7f2e8' stroke='#3a2f2a' stroke-width='3' stroke-linejoin='round'/><circle cx='41' cy='50' r='4' fill='#3a2f2a'/><circle cx='59' cy='50' r='4' fill='#3a2f2a'/><ellipse cx='50' cy='68' rx='11' ry='8' fill='#edc9bf' stroke='#3a2f2a' stroke-width='2.5'/><circle cx='46' cy='68' r='1.8' fill='#3a2f2a'/><circle cx='54' cy='68' r='1.8' fill='#3a2f2a'/></svg>`;
+
+let N=3,car,pick,rest,shown,phase,my={};
+try{my=JSON.parse(localStorage.getItem('mh-score')||'{}')||{}}catch(e){my={}}
+const S=()=>my[N]||(my[N]={stay:[0,0],sw:[0,0]});
+const save=()=>{try{localStorage.setItem('mh-score',JSON.stringify(my))}catch(e){}};
+const doorsEl=$('doors');
+const btns=()=>[...doorsEl.children];
+
+function build(){
+  doorsEl.className='doors d'+N;doorsEl.innerHTML='';
+  for(let i=0;i<N;i++){const b=document.createElement('button');b.addEventListener('click',()=>choose(i));doorsEl.appendChild(b)}
+}
+function render(){
+  let k=0;
+  btns().forEach((b,i)=>{
+    const open=phase==='done'||(phase==='decide'&&i!==pick&&i!==rest);
+    b.disabled=phase!=='pick';
+    b.className='door'+(i===pick?' picked':'');
+    if(open){
+      b.classList.add('open');
+      if(!shown.has(i)){shown.add(i);b.classList.add('swing');b.style.animationDelay=(k++*70)+'ms'}
+      if(phase==='done')b.classList.add(i===car?'win':'lose');
+      b.innerHTML=`<span class="em">${i===car?CAR:GOAT}</span><small>Door ${i+1}</small>`;
+    }else{
+      b.style.animationDelay='';
+      b.innerHTML='<span class="num">'+(i+1)+'</span>'+(i===pick?'<small>Your pick</small>':(phase==='decide'&&i===rest?'<small>Still closed</small>':''));
+    }
+    b.setAttribute('aria-label','Door '+(i+1)+(open?(i===car?', car':', goat'):''));
+  });
+}
+function newGame(){
+  car=Math.floor(Math.random()*N);pick=null;rest=null;shown=new Set();phase='pick';
+  $('msg').textContent='Pick a door.';
+  ['stay','switch','again'].forEach(k=>$(k).hidden=true);
+  render();
+}
+function choose(i){
+  if(phase!=='pick')return;
+  pick=i;
+  const others=[...Array(N).keys()].filter(d=>d!==pick);
+  rest=pick===car?others[Math.floor(Math.random()*others.length)]:car;
+  phase='decide';
+  const o=N-2;
+  $('msg').textContent='The host opened '+o+' goat door'+(o>1?'s':'')+'. Stay with door '+(pick+1)+' or switch to door '+(rest+1)+'?';
+  $('switch').textContent='Switch to door '+(rest+1);
+  $('stay').hidden=false;$('switch').hidden=false;
+  render();
+}
+function finish(sw){
+  if(phase!=='decide')return;
+  const final=sw?rest:pick,won=final===car,r=S()[sw?'sw':'stay'];
+  r[1]++;if(won)r[0]++;save();
+  pick=final;phase='done';
+  $('msg').textContent=(won?'You won the car! ':'Goat. ')+'You '+(sw?'switched':'stayed')+' and ended on door '+(pick+1)+'.';
+  $('stay').hidden=true;$('switch').hidden=true;$('again').hidden=false;
+  render();drawMine();
+  if(won)confetti();
+}
+function confetti(){
+  if(matchMedia('(prefers-reduced-motion:reduce)').matches)return;
+  const c=document.createElement('div');c.className='conf';
+  const cols=['#e8a317','#8a5a33','#2c8a5e','#e0453a','#ffffff'];
+  for(let i=0;i<40;i++){const s=document.createElement('span');s.style.left=Math.random()*100+'%';s.style.background=cols[i%5];s.style.animationDelay=Math.random()*.4+'s';s.style.animationDuration=(1.4+Math.random())+'s';c.appendChild(s)}
+  document.body.appendChild(c);setTimeout(()=>c.remove(),3000);
+}
+$('stay').onclick=()=>finish(false);
+$('switch').onclick=()=>finish(true);
+$('again').onclick=newGame;
+$('reset').onclick=()=>{my={};save();drawMine()};
+
+function bar(label,w,n,cls){
+  const p=n?Math.round(w/n*100):0;
+  return '<div class="bar"><div class="sub"><span>'+label+'</span><span>'+w+' of '+n+' won</span></div><div class="track"><div class="fill '+cls+'" style="width:'+p+'%">'+(n?p+'%':'')+'</div></div></div>';
+}
+function drawMine(){
+  const s=S();
+  $('mineh').textContent='Your results ('+N+' doors)';
+  $('mine').innerHTML=bar('Stay',s.stay[0],s.stay[1],'')+bar('Switch',s.sw[0],s.sw[1],'sw');
+}
+function simulate(n){
+  let s=0,w=0;
+  for(let k=0;k<n;k++){if(Math.floor(Math.random()*N)===Math.floor(Math.random()*N))s++;else w++}
+  $('sim').innerHTML=bar('Always stay ('+N+' doors)',s,n,'')+bar('Always switch ('+N+' doors)',w,n,'sw');
+  $('note').textContent='Switching wins whenever your first pick was a goat, which is '+(N-1)+' times out of '+N+'. Staying only wins 1 time out of '+N+'.';
+}
+[1,10,100,1000,10000].forEach(n=>{
+  const b=document.createElement('button');b.className='b alt';b.textContent='Play '+n.toLocaleString()+(n===1?' game':' games');
+  b.onclick=()=>simulate(n);$('runs').appendChild(b);
+});
+function setMode(n){
+  N=n;
+  
+  $('sim').innerHTML='';$('note').textContent='';
+  build();newGame();drawMine();
+}
+setMode(3);
+</script>
+</body>
+</html>
